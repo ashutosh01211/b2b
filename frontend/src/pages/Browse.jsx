@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api, { fileUrl } from "@/lib/api";
+import { FavoriteButton } from "@/hooks/useFavorites";
 
 const PROD_FALLBACK = "https://images.unsplash.com/photo-1717386255773-1e3037c81788?crop=entropy&cs=srgb&fm=jpg&q=85";
 
@@ -92,7 +93,10 @@ export default function Browse() {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((p) => (
-                  <Link key={p.id} to={`/products/${p.id}`} className="card-flat block" data-testid={`product-card-${p.id}`}>
+                  <Link key={p.id} to={`/products/${p.id}`} className="card-flat block relative" data-testid={`product-card-${p.id}`}>
+                    <div className="absolute top-3 right-3 z-10">
+                      <FavoriteButton productId={p.id} />
+                    </div>
                     <div className="aspect-[4/3] bg-slate-100 overflow-hidden border-b border-slate-200">
                       <img src={p.images?.[0] ? fileUrl(p.images[0]) : PROD_FALLBACK} alt="" className="w-full h-full object-cover" />
                     </div>

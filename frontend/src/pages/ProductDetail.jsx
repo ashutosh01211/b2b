@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api, { fileUrl, formatApiErrorDetail } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { FavoriteButton } from "@/hooks/useFavorites";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -86,7 +87,7 @@ export default function ProductDetail() {
 
             <p className="text-slate-700 leading-relaxed mt-6">{product.description || "No description provided."}</p>
 
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex gap-3 items-stretch">
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <button data-testid="product-inquiry-btn" className="btn-primary flex-1">Send Inquiry →</button>
@@ -111,6 +112,7 @@ export default function ProductDetail() {
                   </div>
                 </DialogContent>
               </Dialog>
+              <FavoriteButton productId={id} className="!p-4" />
             </div>
           </div>
         </div>

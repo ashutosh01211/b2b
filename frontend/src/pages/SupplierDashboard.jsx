@@ -39,13 +39,16 @@ export default function SupplierDashboard() {
     } catch (e) { toast.error(formatApiErrorDetail(e.response?.data?.detail)); }
   };
 
-  const uploadImage = async (file) => {
+  const uploadImages = async (files) => {
+    if (!files || files.length === 0) return;
     setUploading(true);
     try {
-      const fd = new FormData(); fd.append("file", file);
-      const { data } = await api.post("/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      setForm(f => ({ ...f, images: [...f.images, data.path] }));
-      toast.success("Image uploaded");
+      const fd = new FormData();
+      Array.from(files).forEach((f) => fd.append("files", f));
+      const { data } = await api.post("/upload/bulk", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const paths = data.uploaded.map((u) => u.path);
+      setForm((f) => ({ ...f, images: [...f.images, ...paths] }));
+      toast.success(`${data.count} image(s) uploaded`);
     } catch (e) {
       toast.error(formatApiErrorDetail(e.response?.data?.detail) || "Upload failed");
     } finally { setUploading(false); }
@@ -135,8 +138,8 @@ export default function SupplierDashboard() {
                       <textarea rows={4} className="input-flat" style={{ height: "auto", padding: "0.75rem 1rem" }} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                     </div>
                     <div>
-                      <label className="label-eyebrow block mb-2">Images</label>
-                      <input data-testid="product-image-input" type="file" accept="image/*" onChange={(e) => e.target.files[0] && uploadImage(e.target.files[0])} />
+                      <label className="label-eyebrow block mb-2">Images (select multiple)</label>
+                      <input data-testid="product-image-input" type="file" accept="image/*" multiple onChange={(e) => uploadImages(e.target.files)} />
                       {uploading && <div className="text-sm text-slate-500 mt-2">Uploading…</div>}
                       <div className="grid grid-cols-4 gap-2 mt-3">
                         {form.images.map((p, idx) => (

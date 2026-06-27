@@ -20,16 +20,17 @@ Build a B2B marketplace where suppliers register companies and upload products. 
 - Admin seeded on startup (`admin@b2bhub.com` / `Admin@12345`)
 - Companies: list, view by id, supplier-self update
 - Products: CRUD, search by query+category, categories endpoint
-- Image upload (multipart → object storage), file serving
+- Image upload (multipart → object storage) + bulk multi-file upload (`/api/upload/bulk`)
+- File serving via `/api/files/{path}`
 - Inquiries (buyer→supplier) auto-create chat threads
 - Threads/messages REST + WebSocket realtime broadcast
 - Admin endpoints: stats, users, companies (verify), products
+- **Saved/Favorited products** (buyer): toggle, list, IDs endpoints + heart icon on cards/detail + "Saved" tab in Buyer Dashboard
+- **Email notifications** on new inquiries via Resend (Resend SDK + asyncio.to_thread). Falls back to `[EMAIL-MOCK]` console log when `RESEND_API_KEY` empty
 - Pages: Landing, Login, Register, Browse (products/suppliers), Product detail, Company profile, Buyer/Supplier/Admin dashboards, Chat
 
 ## Backlog (P1/P2)
-- P1: Saved/favorited products for buyers
-- P1: Email notifications on new inquiries
-- P1: Multi-image gallery upload-at-once
+- P1: Set `RESEND_API_KEY` in `/app/backend/.env` to enable real email sends
 - P2: Advanced filters (country, MOQ range, certifications)
 - P2: Order/RFQ workflow with attachments
 - P2: Stripe escrow for transactions (revenue lever)

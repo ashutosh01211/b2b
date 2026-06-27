@@ -7,9 +7,11 @@ load_dotenv(ROOT_DIR / '.env')
 import os
 import uuid
 import logging
+import asyncio
 import bcrypt
 import jwt
 import requests
+import resend
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict
 from fastapi import (
@@ -28,6 +30,10 @@ JWT_ALG = "HS256"
 APP_NAME = os.environ.get('APP_NAME', 'b2bhub')
 STORAGE_URL = "https://integrations.emergentagent.com/objstore/api/v1/storage"
 EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY')
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
 
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
@@ -368,6 +374,33 @@ async def upload_file(file: UploadFile = File(...), user: dict = Depends(get_cur
     })
     return {"path": result["path"], "url": f"/api/files/{result['path']}"}
 
+@api.post("/upload/bulk")
+async def upload_bulk(files: List[UploadFile] = File(...), user: dict = Depends(get_current_user)):
+    if len(files) > 10:
+        raise HTTPException(400, "Max 10 files per upload")
+    results = []
+    for file in files:
+        ext = file.filename.split(".")[-1].lower() if "." in file.filename else "bin"
+        if ext not in ("jpg", "jpeg", "png", "gif", "webp"):
+            continue
+        data = await file.read()
+        if len(data) > 5 * 1024 * 1024:
+            continue
+        path = f"{APP_NAME}/uploads/{user['id']}/{uuid.uuid4()}.{ext}"
+        ct = file.content_type or f"image/{ext}"
+        try:
+            result = put_object(path, data, ct)
+            await db.files.insert_one({
+                "id": str(uuid.uuid4()), "storage_path": result["path"],
+                "user_id": user["id"], "content_type": ct,
+                "size": result.get("size", len(data)), "is_deleted": False,
+                "created_at": now_iso(),
+            })
+            results.append({"path": result["path"], "url": f"/api/files/{result['path']}"})
+        except Exception as e:
+            logger.error(f"Bulk upload failed for {file.filename}: {e}")
+    return {"uploaded": results, "count": len(results)}
+
 @api.get("/files/{path:path}")
 async def serve_file(path: str):
     record = await db.files.find_one({"storage_path": path, "is_deleted": False})
@@ -375,6 +408,57 @@ async def serve_file(path: str):
         raise HTTPException(404, "Not found")
     data, ct = get_object(path)
     return Response(content=data, media_type=record.get("content_type", ct))
+
+# ===== Email =====
+async def send_email(to: str, subject: str, html: str):
+    """Sends email via Resend if API key set; otherwise logs to console."""
+    if not RESEND_API_KEY:
+        logger.info(f"[EMAIL-MOCK] To={to} | Subject={subject}")
+        return {"mocked": True}
+    try:
+        params = {"from": SENDER_EMAIL, "to": [to], "subject": subject, "html": html}
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Email sent to {to}: {result.get('id')}")
+        return result
+    except Exception as e:
+        logger.error(f"Email send failed: {e}")
+        return {"error": str(e)}
+
+# ===== Favorites =====
+@api.get("/favorites")
+async def list_favorites(user: dict = Depends(require_role("buyer"))):
+    favs = await db.favorites.find({"buyer_id": user["id"]}, {"_id": 0}).to_list(500)
+    pids = [f["product_id"] for f in favs]
+    if not pids:
+        return []
+    products = await db.products.find({"id": {"$in": pids}}, {"_id": 0}).to_list(500)
+    cids = list({p.get("company_id") for p in products if p.get("company_id")})
+    cmap = {}
+    async for c in db.companies.find({"id": {"$in": cids}}, {"_id": 0, "id": 1, "name": 1}):
+        cmap[c["id"]] = c
+    for p in products:
+        p["company"] = cmap.get(p.get("company_id"), {})
+    return products
+
+@api.get("/favorites/ids")
+async def list_favorite_ids(user: dict = Depends(require_role("buyer"))):
+    favs = await db.favorites.find({"buyer_id": user["id"]}, {"_id": 0, "product_id": 1}).to_list(500)
+    return [f["product_id"] for f in favs]
+
+@api.post("/favorites/{product_id}")
+async def toggle_favorite(product_id: str, user: dict = Depends(require_role("buyer"))):
+    existing = await db.favorites.find_one({"buyer_id": user["id"], "product_id": product_id})
+    if existing:
+        await db.favorites.delete_one({"_id": existing["_id"]})
+        return {"favorited": False}
+    product = await db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(404, "Product not found")
+    await db.favorites.insert_one({
+        "id": str(uuid.uuid4()), "buyer_id": user["id"], "product_id": product_id,
+        "created_at": now_iso(),
+    })
+    return {"favorited": True}
 
 # ===== Inquiries =====
 @api.post("/inquiries")
@@ -415,6 +499,35 @@ async def create_inquiry(data: InquiryIn, user: dict = Depends(require_role("buy
         "sender_name": user["name"], "body": data.message, "created_at": now_iso(),
     })
     await db.threads.update_one({"id": thread_id}, {"$set": {"last_message_at": now_iso()}})
+
+    # Send email notification to supplier (non-blocking)
+    supplier = await db.users.find_one({"id": product["supplier_id"]})
+    if supplier:
+        html = f"""
+        <table style="font-family:Arial,sans-serif;max-width:600px;border:1px solid #E2E8F0;padding:24px">
+          <tr><td>
+            <h2 style="color:#0F172A;margin:0 0 16px 0">New Inquiry on B2B/HUB</h2>
+            <p style="color:#475569;line-height:1.6">
+              Hi {supplier['name']},<br/><br/>
+              <strong>{user['name']}</strong> sent you an inquiry about
+              <strong>{product['title']}</strong>.
+            </p>
+            <div style="background:#F8FAFC;border-left:3px solid #0047FF;padding:12px;margin:16px 0">
+              <p style="margin:0;color:#0F172A"><strong>Quantity:</strong> {data.quantity}</p>
+              <p style="margin:8px 0 0 0;color:#475569">{data.message}</p>
+            </div>
+            <a href="{os.environ.get('FRONTEND_URL','')}/chat/{thread_id}"
+               style="display:inline-block;background:#0047FF;color:white;padding:12px 24px;text-decoration:none;font-weight:bold">
+              Reply to buyer →
+            </a>
+          </td></tr>
+        </table>
+        """
+        asyncio.create_task(send_email(
+            supplier["email"],
+            f"New inquiry: {product['title']}",
+            html,
+        ))
 
     doc.pop("_id", None)
     return doc
@@ -595,6 +708,7 @@ async def startup():
     await db.companies.create_index("name")
     await db.threads.create_index([("buyer_id", 1), ("supplier_id", 1)])
     await db.messages.create_index("thread_id")
+    await db.favorites.create_index([("buyer_id", 1), ("product_id", 1)], unique=True)
 
     # Seed admin
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@b2bhub.com").lower()
