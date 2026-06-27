@@ -1,0 +1,164 @@
+{
+  "theme": "LIGHT",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "domain_context": "B2B Marketplace SaaS",
+  "typography": {
+    "headings": {
+      "font_family": "'Chivo', sans-serif",
+      "weights": ["300", "400", "700", "900"],
+      "strategy": "Swiss Brutalist - radical weight contrast (Black vs Light). Tracking tight on large sizes. Never use Inter or generic fonts."
+    },
+    "body": {
+      "font_family": "'IBM Plex Sans', sans-serif",
+      "weights": ["400", "500", "600"],
+      "strategy": "Clean, highly readable text, loose leading for body paragraphs."
+    },
+    "scale": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter leading-none font-black",
+      "h2": "text-3xl sm:text-4xl tracking-tight leading-tight font-bold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-bold",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs tracking-[0.2em] uppercase font-bold text-slate-500"
+    }
+  },
+  "colors": {
+    "background": {
+      "primary": "#FFFFFF",
+      "secondary": "#F8FAFC",
+      "tertiary": "#F1F5F9"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "tertiary": "#64748B",
+      "inverse": "#FFFFFF"
+    },
+    "brand": {
+      "primary": "#0047FF", 
+      "primary_hover": "#003BE0",
+      "accent_red": "#E53935",
+      "accent_yellow": "#FFC107"
+    },
+    "borders": {
+      "default": "#E2E8F0",
+      "focus": "#0047FF"
+    },
+    "states": {
+      "success": "#10B981",
+      "error": "#EF4444",
+      "warning": "#F59E0B"
+    }
+  },
+  "layout_and_spacing": {
+    "strategy": "The 'Control Room' Grid for Dashboards and 'Swiss Grid' for Marketing pages.",
+    "spacing_scale": "Generous - p-6, p-8, p-12. Deeply structured.",
+    "borders_and_radius": "Sharp edges (rounded-none or rounded-sm max 2px). Technical grid borders (border-collapse look).",
+    "shadows": "Minimal. 1px solid strokes or drop-shadow-sm. No soft muddy shadows.",
+    "components": {
+      "cards": "Flat background, 1px subtle border, sharp corners. Hover: slight lift (-translate-y-1), border color darkens.",
+      "buttons": "Sharp corners, high contrast. Primary: bg-[#0047FF] text-white hover:bg-[#003BE0]. Secondary: Transparent bg, 1px solid border border-slate-900 text-slate-900 hover:bg-slate-50.",
+      "inputs": "Shadcn based. Sharp corners, 1px border. Focus state: ring-2 ring-[#0047FF] ring-offset-1."
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Avoid glassmorphism for this archetype. Use solid, opaque surfaces to maintain authority and clarity.",
+    "grid_lines": "Expose the skeleton. Use border-r border-b border-slate-200 to separate items in grids.",
+    "motion": "Minimalist. Hover states on interactive elements. Fast, crisp transitions (0.15s ease-in-out).",
+    "icons": "Phosphor Icons (@phosphor-icons/react) for sharp, technical look."
+  },
+  "pages_and_components": {
+    "landing_page": {
+      "hero": "Massive typography (Chivo Black), asymmetric grid layout. Right side: abstract geometric corporate background or modern glass skyscraper. Hero overlay: Max bg-black/30 or gradient overlay.",
+      "features": "Bento 'Tetris' grid. Mix of 3 shapes. Sharp borders separating items. Pure HTML + Tailwind CSS."
+    },
+    "product_catalog": {
+      "layout": "Flow-First & Task-Oriented. Progressive Disclosure. Context-aware interfaces over static feature grids.",
+      "cards": "Modular cards. Image, title, specs, and a clear CTA. Flat rectangular shapes."
+    },
+    "dashboard": {
+      "layout": "Control Room Grid. Base Grid: grid-cols-1 md:grid-cols-4. Tight gap (gap-4). Every pixel utilized.",
+      "sidebar": "Clean, structural, role-based. Active state highlighted with 2px left border of #0047FF."
+    },
+    "forms": {
+      "layout": "Use standard Shadcn forms but override border-radius to rounded-none.",
+      "inputs": "Label: uppercase, tracking-widest, text-xs. Input: h-12, sharp borders."
+    }
+  },
+  "media": {
+    "hero_backgrounds": [
+      {
+        "url": "https://images.unsplash.com/photo-1760124056883-732e7a5e2e68?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBvZmZpY2UlMjBidWlsZGluZyUyMGdsYXNzJTIwY29ycG9yYXRlfGVufDB8fHx8MTc4MjU1MTA0Mnww&ixlib=rb-4.1.0&q=85",
+        "description": "Modern glass skyscrapers",
+        "category": "hero"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1462556791646-c201b8241a94?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGdlb21ldHJpYyUyMGNvcnBvcmF0ZSUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzgyNTUxMDU3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract geometric corporate background",
+        "category": "hero_abstract"
+      }
+    ],
+    "products": [
+      {
+        "url": "https://images.unsplash.com/photo-1717386255773-1e3037c81788?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwbWFjaGluZXJ5JTIwcHJvZHVjdCUyMG1hbnVmYWN0dXJpbmd8ZW58MHx8fHwxNzgyNTUxMDQyfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Industrial machinery inside building",
+        "category": "product"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1647427060118-4911c9821b82?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwyfHxpbmR1c3RyaWFsJTIwbWFjaGluZXJ5JTIwcHJvZHVjdCUyMG1hbnVmYWN0dXJpbmd8ZW58MHx8fHwxNzgyNTUxMDQyfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Orange machines factory",
+        "category": "product"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1610891015188-5369212db097?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHw0fHxpbmR1c3RyaWFsJTIwbWFjaGluZXJ5JTIwcHJvZHVjdCUyMG1hbnVmYWN0dXJpbmd8ZW58MHx8fHwxNzgyNTUxMDQyfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Industrial textile factory",
+        "category": "product"
+      }
+    ],
+    "avatars": [
+      {
+        "url": "https://images.pexels.com/photos/14585727/pexels-photo-14585727.jpeg",
+        "description": "Formal portrait of a young man",
+        "category": "user_avatar"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBvcnRyYWl0JTIwaGVhZHNob3R8ZW58MHx8fHwxNzgyNTUxMDU2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Man standing beside wall",
+        "category": "user_avatar"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1685760259914-ee8d2c92d2e0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBvcnRyYWl0JTIwaGVhZHNob3R8ZW58MHx8fHwxNzgyNTUxMDU2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Woman with arms crossed",
+        "category": "user_avatar"
+      }
+    ],
+    "logos": [
+      {
+        "url": "https://images.unsplash.com/photo-1669220339242-c12788586902?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBicmFuZCUyMGxvZ28lMjBpY29uJTIwZGVzaWdufGVufDB8fHx8MTc4MjU1MTA1Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Brand logo 1",
+        "category": "company_logo"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1705904506562-f28266845273?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBicmFuZCUyMGxvZ28lMjBpY29uJTIwZGVzaWdufGVufDB8fHx8MTc4MjU1MTA1Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Brand logo 2",
+        "category": "company_logo"
+      }
+    ]
+  },
+  "accessibility_and_testing": {
+    "contrast": "Maintain strictly minimum 4.5:1 for standard text. Always test contrast.",
+    "testing_attributes": "CRITICAL: All interactive and key informational elements MUST include a data-testid attribute to facilitate robust automated testing. Example: data-testid='login-submit-button', data-testid='buyer-inquiry-form'.",
+    "focus_states": "Must have HIGHER contrast. focus:ring-2 focus:ring-[#0047FF] focus:outline-none"
+  },
+  "instructions_to_main_agent": [
+    "Install Phosphor Icons: yarn add @phosphor-icons/react",
+    "Add Google Fonts: Import 'Chivo' and 'IBM Plex Sans' in index.html.",
+    "Use standard HTML divs and sections for marketing layouts. Avoid Shadcn for landing page layout.",
+    "For Dashboard and Auth forms, use heavily customized Shadcn components (sharp borders, rounded-none or rounded-sm, specific typography).",
+    "Ensure the hero overlay opacity never exceeds bg-black/50, and use a gradient overlay for text contrast.",
+    "Apply 'data-testid' to ALL buttons, links, and forms.",
+    "Build the dashboard using the 'Control Room' grid pattern, removing unnecessary whitespace to pack data densely.",
+    "Never use placeholder URLs like via.placeholder.com. ONLY use the media URLs provided in this guideline.",
+    "Maintain the Swiss Brutalist identity. No gradients, no soft shadows, stick to flat high contrast colors and sharp borders."
+  ]
+}
