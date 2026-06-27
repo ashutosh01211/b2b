@@ -1,0 +1,39 @@
+{
+  "summary": "T1 latency-sensitive testing of B2B marketplace. Backend (auth, products CRUD with ownership, file upload+download, inquiries, threads, messages REST + WebSocket, admin endpoints) and frontend e2e (landing, admin login + stats, buyer login, browse, product detail, send inquiry, chat with message) all working. Found 4 minor backend issues (non-blocking) and 1 frontend a11y warning.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "POST /api/auth/login for admin/buyer/supplier",
+    "POST /api/auth/register buyer (no company) and supplier (creates company, returns company_id)",
+    "POST /api/products as supplier creates product; product appears in GET /api/products with company info",
+    "GET /api/products/{id} returns product with company joined (Test Industries)",
+    "PUT /api/products/{id} updates fields for owner; buyer PUT returns 403",
+    "POST /api/upload as supplier returns {path,url}; GET /api/files/{path} returns 200",
+    "PUT /api/companies/me by supplier returns 200",
+    "POST /api/inquiries by buyer creates inquiry + thread + initial message (thread_id returned)",
+    "GET /api/threads filtered by role (buyer sees own thread)",
+    "POST /api/threads/{id}/messages adds message (when thread_id provided in body)",
+    "GET /api/threads/{id}/messages by supplier (participant) returns messages",
+    "WebSocket /api/ws/chat/{tid}?token=JWT connects, sends {body}, receives broadcast",
+    "GET /api/admin/stats, /admin/users, /admin/companies as admin; 403 for buyer",
+    "POST /api/admin/companies/{id}/verify returns ok:true",
+    "DELETE /api/admin/users/{self} returns 400 (cannot delete self)",
+    "Frontend: Landing hero loads, admin login redirects to /admin and shows stats",
+    "Frontend: Buyer login redirects to /buyer; Browse shows products",
+    "Frontend: ProductDetail Send Inquiry dialog creates thread and redirects to /chat/{id}",
+    "Frontend: Chat page renders previous messages (REST + WS messages visible)"
+  ],
+  "failed": [
+    {"area": "Backend - PUT /api/products/{id}", "issue": "Acts like full replace; fields not provided in body get reset to schema defaults (description='', category='General', moq=1) even though endpoint suggests partial update", "evidence": "After PUT {price:199.99}, GET shows category='General', description='', moq=1", "priority": "MEDIUM"},
+    {"area": "Backend - PUT /api/companies/me", "issue": "Response payload does not echo updated 'description' field (returned None in parsed body)", "evidence": "curl PUT /api/companies/me with {description:'Updated by T1'} returns body where description is missing/None", "priority": "LOW"},
+    {"area": "Backend - POST /api/threads/{thread_id}/messages", "issue": "MessageIn Pydantic model requires thread_id in BODY even though it is already in path. REST clients must duplicate it (frontend already does, but API is awkward and 422 if omitted)", "evidence": "POST with only {body} returns 422 'Field required: thread_id'. server.py:174-176", "priority": "LOW"},
+    {"area": "Frontend - Inquiry Dialog", "issue": "Radix DialogContent missing Description/aria-describedby (a11y warning)", "evidence": "Console warning on opening inquiry dialog", "priority": "LOW"}
+  ],
+  "action_items": [
+    "Optional: Make PUT /api/products/{id} a true partial update (exclude_unset) so non-provided fields are not reset.",
+    "Optional: Remove thread_id requirement from MessageIn body since it's a path param, or keep but make optional.",
+    "Optional: Add DialogDescription / aria-describedby to inquiry dialog to clear a11y warning."
+  ],
+  "success_rate": {"backend": "100% critical / ~85% strict (4 minor issues)", "frontend": "100% on critical e2e flow"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
